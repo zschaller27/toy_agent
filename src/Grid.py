@@ -1,5 +1,4 @@
 import os
-
 class Grid:
     def __init__(self, file_path):
         """
@@ -97,4 +96,3 @@ class Grid:
             return_dict[i] = key
 
         return return_dict
-        
