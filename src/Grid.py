@@ -81,4 +81,20 @@ class Grid:
             False - othwerwise
         """
         return coords == self.goal_state
+    
+    def getStateMap(self):
+        """
+        Returns a dictionary which maps each state to a single integer.
+
+        Returns:
+            dictionary where each key is an integer and associated with a single
+            coordinate.
+        """
+        return_dict = {}    # Initialize a dictionary to update
+
+        # For each key, assign it the next avalible integer
+        for i, key in enumerate(self.grid_loc_dict.keys()):
+            return_dict[i] = key
+
+        return return_dict
         
