@@ -37,5 +37,49 @@ class WorldEnv:
         Returns:
             A 3D numpy matrix which has the dimensions (starting state x final state x actions).
         """
-        # TODO: finish implementation of this function
-        pass
+        # First construct P dictionary
+        P = {}
+        x_dim, y_dim = grid.getDimensions()
+        actions = {"UP" : 0, "DOWN" : 1, "LEFT" : 2, "RIGHT" : 3}
+        state_map = grid.getStateMap()
+
+        # Go through each state and construct a map of state after each possible action
+        for state in state_map.keys():
+            P[state] = {action : [] for action in range(len(actions))}
+            x, y = state_map[state]
+
+            ## Actions ##
+            # UP
+            if y == 0 or grid.getState(state - y_dim) != '-':
+                P[state]["UP"] = state
+            else:
+                P[state]["UP"] = state - y_dim
+            
+            # DOWN
+            if y == y_dim - 1 or grid.getState(state + y_dim) != '-':
+                P[state]["DOWN"] = state
+            else:
+                P[state]["DOWN"] = state + y_dim
+
+            # LEFT
+            if x == 0 or grid.getState(state - x_dim) != '-':
+                P[state]["LEFT"] = state
+            else:
+                P[state]["LEFT"] = state - x_dim
+
+            # RIGHT
+            if x == x_dim - 1 or grid.getState(state + x_dim) != '-':
+                P[state]["RIGHT"] = state
+            else:
+                P[state]["RIGHT"] = state + x_dim
+        
+        # Construct 3D numpy matrix showing the transitions
+        B = np.zeros([len(state_map), len(state_map), len(actions)])
+        for state in state_map.keys():
+            # For each action find the next state using the P matrix
+            for action in actions.keys():
+                new_state = P[state][actions[action]]
+
+                B[new_state, state, actions[action]] = 1
+        
+        return B
