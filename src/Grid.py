@@ -1,4 +1,5 @@
 import os
+
 class Grid:
     def __init__(self, file_path):
         """
@@ -46,17 +47,20 @@ class Grid:
 
             coords = (coords[0] + 1, coords[1])
 
-    def getState(self, coords):
+    def getState(self, state):
         """
         Returns the saved grid value for a given coordinate location
 
         Paramters:
-            coords - a coordinate tuple in the form of (x, y)
+            state - either a coordinate tuple in the form of (x, y) or the statemap
+            id associated with a coordinate
         
         Returns:
             grid character associated with the the given coordinates
         """
-        return self.grid_loc_dict[coords]
+        if isinstance(state, int):
+            return self.grid_loc_dict[self.getStateMap[state]]
+        return self.grid_loc_dict[state]
     
     def getStartLocation(self):
         """
@@ -80,7 +84,7 @@ class Grid:
             False - othwerwise
         """
         return coords == self.goal_state
-    
+
     def getStateMap(self):
         """
         Returns a dictionary which maps each state to a single integer.
@@ -96,3 +100,44 @@ class Grid:
             return_dict[i] = key
 
         return return_dict
+    
+    def getId(self, coord):
+        """
+        Find the statemap id given the coordinates.
+
+        Parameters:
+            coord - a tuple in the form of (x, y)
+
+        Returns:
+            A single integer that is the statemap id associated with the given
+            coordinates.
+        """
+        return_dict = {}    # Initialize a dictionary to update
+
+        # For each key, assign it the next avalible integer
+        for i, key in enumerate(self.grid_loc_dict.keys()):
+            return_dict[key] = i
+
+        return return_dict[coord]
+
+    def getDimensions(self):
+        """
+        Returns a tuple of the x and y dimensions of the maze.
+
+        Returns:
+            tuple where the first value is the number of columns in the maze
+            and the second value is the number of rows in the maze.
+        """
+
+        # Go through all coordinate pairs to find the largest x and y (don't have to
+        # be paired together)
+        max_x = None
+        max_y = None
+        for coord in self.grid_loc_dict.keys():
+            if max_x is None or max_x < coord[0]:
+                max_x = coord[0]
+
+            if max_y is None or max_y < coord[1]:
+                max_y = coord[1]
+            
+        return (max_x, max_y)
