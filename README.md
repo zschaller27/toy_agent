@@ -24,6 +24,6 @@
 
 # Todo:
  1. Build Grid class in Grid.py ✓
- 2. Build function to create likelihood matrix (A)
+ 2. Build function to create likelihood matrix (A) ✓
  3. Build function to create transition matrix (B)
  4. Plan Variational Inference steps
