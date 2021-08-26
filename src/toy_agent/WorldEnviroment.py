@@ -1,14 +1,10 @@
 import numpy as np
 
-from src.Grid import Grid
-
 class WorldEnv:
     def __init__(self, grid):
         self.maze_grid = grid
-        self.likelihood_matrix = self.computeLikelihoodMatrix(grid.getStateMap())
-        # self.transition_matrix = 
 
-    def computeLikelihoodMatrix(self, statemap):
+    def computeLikelihoodMatrix(self):
         """
         Compute and return a likelihood matrix for the given maze grid. The result should be 
         n x n where n is the number of possible states from the statemap. The likelihood that an
@@ -22,9 +18,9 @@ class WorldEnv:
             Numpy identity matrix representing the likelihood matrix for the grid enviroment.
         """
 
-        return np.eye(len(statemap))
+        return np.eye(len(self.maze_grid.getStateMap()))
 
-    def computeTransitionMatrix(self, grid):
+    def computeTransitionMatrix(self):
         """
         Compute and return a transition matrix for the given grid object. The matrix should show,
         for each starting state, what the final state would be for each action. If an action would
@@ -39,9 +35,9 @@ class WorldEnv:
         """
         # First construct P dictionary
         P = {}
-        x_dim, y_dim = grid.getDimensions()
+        x_dim, y_dim = self.maze_grid.getDimensions()
         actions = {"UP" : 0, "DOWN" : 1, "LEFT" : 2, "RIGHT" : 3}
-        state_map = grid.getStateMap()
+        state_map = self.maze_grid.getStateMap()
 
         # Go through each state and construct a map of state after each possible action
         for state in state_map.keys():
@@ -50,25 +46,25 @@ class WorldEnv:
 
             ## Actions ##
             # UP
-            if y == 0 or grid.getState(state - y_dim) != '-':
+            if y == 0 or self.maze_grid.getState(state - y_dim) != '-':
                 P[state]["UP"] = state
             else:
                 P[state]["UP"] = state - y_dim
             
             # DOWN
-            if y == y_dim - 1 or grid.getState(state + y_dim) != '-':
+            if y == y_dim - 1 or self.maze_grid.getState(state + y_dim) != '-':
                 P[state]["DOWN"] = state
             else:
                 P[state]["DOWN"] = state + y_dim
 
             # LEFT
-            if x == 0 or grid.getState(state - x_dim) != '-':
+            if x == 0 or self.maze_grid.getState(state - x_dim) != '-':
                 P[state]["LEFT"] = state
             else:
                 P[state]["LEFT"] = state - x_dim
 
             # RIGHT
-            if x == x_dim - 1 or grid.getState(state + x_dim) != '-':
+            if x == x_dim - 1 or self.maze_grid.getState(state + x_dim) != '-':
                 P[state]["RIGHT"] = state
             else:
                 P[state]["RIGHT"] = state + x_dim

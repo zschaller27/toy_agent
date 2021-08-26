@@ -59,7 +59,7 @@ class Grid:
             grid character associated with the the given coordinates
         """
         if isinstance(state, int):
-            return self.grid_loc_dict[self.getStateMap[state]]
+            return self.grid_loc_dict[self.getStateMap()[state]]
         return self.grid_loc_dict[state]
     
     def getStartLocation(self):
