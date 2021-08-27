@@ -40,8 +40,6 @@ class WorldEnv:
         state_map_int = self.maze_grid.getStateMapIntToTuple()
         state_map_tuple = self.maze_grid.getStateMapTupleToInt()
 
-        print(state_map_int)
-
         # Go through each state and construct a map of state after each possible action
         for state in state_map_int.keys():
             P[state] = {action : [] for action in range(len(actions))}
@@ -66,8 +64,6 @@ class WorldEnv:
                 P[state][actions['RIGHT']] = state
             else:
                 P[state][actions['RIGHT']] = state_map_tuple[(x + 1, y)]
-
-        print(P)
 
         # Construct 3D numpy matrix showing the transitions
         B = np.zeros([len(state_map_int), len(state_map_int), len(actions)])
