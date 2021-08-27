@@ -18,7 +18,7 @@ class WorldEnv:
             Numpy identity matrix representing the likelihood matrix for the grid enviroment.
         """
 
-        return np.eye(len(self.maze_grid.getStateMap()))
+        return np.eye(len(self.maze_grid.getStateMapIntToTuple()))
 
     def computeTransitionMatrix(self):
         """
@@ -37,41 +37,41 @@ class WorldEnv:
         P = {}
         x_dim, y_dim = self.maze_grid.getDimensions()
         actions = {"UP" : 0, "DOWN" : 1, "LEFT" : 2, "RIGHT" : 3}
-        state_map = self.maze_grid.getStateMap()
+        state_map_int = self.maze_grid.getStateMapIntToTuple()
+        state_map_tuple = self.maze_grid.getStateMapTupleToInt()
+
+        print(state_map_int)
 
         # Go through each state and construct a map of state after each possible action
-        for state in state_map.keys():
+        for state in state_map_int.keys():
             P[state] = {action : [] for action in range(len(actions))}
-            x, y = state_map[state]
+            x, y = state_map_int[state]
 
-            ## Actions ##
-            # UP
-            if y == 0 or self.maze_grid.getState(state - y_dim) != '-':
-                P[state]["UP"] = state
+            if y <= 0:
+                P[state][actions['UP']] = state
             else:
-                P[state]["UP"] = state - y_dim
+                P[state][actions['UP']] =  state_map_tuple[(x, y - 1)]
+
+            if y >= y_dim - 1:
+                P[state][actions["DOWN"]] = state
+            else:
+                P[state][actions["DOWN"]] = state_map_tuple[(x, y + 1)]
+
+            if x <= 0:
+                P[state][actions['LEFT']] = state
+            else:
+                P[state][actions['LEFT']] = state_map_tuple[(x - 1, y)]
             
-            # DOWN
-            if y == y_dim - 1 or self.maze_grid.getState(state + y_dim) != '-':
-                P[state]["DOWN"] = state
+            if x >= x_dim - 1:
+                P[state][actions['RIGHT']] = state
             else:
-                P[state]["DOWN"] = state + y_dim
+                P[state][actions['RIGHT']] = state_map_tuple[(x + 1, y)]
 
-            # LEFT
-            if x == 0 or self.maze_grid.getState(state - x_dim) != '-':
-                P[state]["LEFT"] = state
-            else:
-                P[state]["LEFT"] = state - x_dim
+        print(P)
 
-            # RIGHT
-            if x == x_dim - 1 or self.maze_grid.getState(state + x_dim) != '-':
-                P[state]["RIGHT"] = state
-            else:
-                P[state]["RIGHT"] = state + x_dim
-        
         # Construct 3D numpy matrix showing the transitions
-        B = np.zeros([len(state_map), len(state_map), len(actions)])
-        for state in state_map.keys():
+        B = np.zeros([len(state_map_int), len(state_map_int), len(actions)])
+        for state in state_map_int.keys():
             # For each action find the next state using the P matrix
             for action in actions.keys():
                 new_state = P[state][actions[action]]

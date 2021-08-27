@@ -1,4 +1,4 @@
-from toy_agent.Grid import Grid
+from src.toy_agent.Grid import Grid
 
 def test_grid():
     # Create test grid object
