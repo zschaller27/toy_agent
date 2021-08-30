@@ -64,12 +64,14 @@ class Grid:
     
     def getStartLocation(self):
         """
-        Returns the coordinates that the agent is designated to start at
+        Returns the coordinates that the agent is designated to start at in the 
+        form of a mapped integer.
 
         Returns:
-            Coordinate tuple in the form of (x, y)
+            Integer associated with the start tuple location
         """
-        return self.agent_start
+        state_map = self.getStateMapTupleToInt()
+        return state_map[self.agent_start]
     
     def isGoalState(self, coords):
         """
@@ -84,6 +86,16 @@ class Grid:
             False - othwerwise
         """
         return coords == self.goal_state
+
+    def getGoalState(self):
+        """
+        Returns an int indicating the state id of the goal state.
+
+        Returns:
+            integer associtaed with the goal state
+        """
+        state_map = self.getStateMapTupleToInt()
+        return state_map[self.goal_state]
 
     def getStateMapIntToTuple(self):
         """
@@ -157,3 +169,6 @@ class Grid:
                 max_y = coord[1]
             
         return (max_x, max_y)
+
+    def getNumStates(self):
+        return len(self.getStateMapIntToTuple())

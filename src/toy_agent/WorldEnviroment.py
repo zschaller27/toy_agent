@@ -1,8 +1,44 @@
 import numpy as np
 
-class WorldEnv:
+from pymdp.envs import Env, TMazeEnv
+from pymdp.distributions import Categorical
+
+LOCATION_FACTOR_ID = 0
+TRIAL_FACTOR_ID = 1
+
+class WorldEnv(Env):
     def __init__(self, grid):
+        super(WorldEnv, self).__init__()
         self.maze_grid = grid
+
+        self._transition_dist = self.computeTransitionMatrix()
+        self._likelihood_dist = self.computeLikelihoodMatrix()
+        
+        self.state = None
+        self.reset()
+
+    def euclidianDistance(self, x, y):
+        x = np.array(x)
+        y = np.array(y)
+        return np.linalg.norm(x - y)
+
+    def distanceToEndState(self, state):
+        state_id = np.where(state == 1)[0][0]
+        print(state_id)
+        return self.euclidianDistance(self.maze_grid.getStateMapIntToTuple()[state_id], self.maze_grid.getStateMapIntToTuple()[self.maze_grid.getGoalState()])
+
+    def get_likelihood_dist(self):
+        return self._likelihood_dist.copy()
+
+    def get_transition_dist(self):
+        return self._transition_dist.copy()
+
+    def step(self, action):
+        self.state = np.dot(self._transition_dist[:, :, action], self.state)
+
+    def reset(self):
+        self.state = np.zeros(self.maze_grid.getNumStates())
+        self.state[self.maze_grid.getStartLocation()] = 1
 
     def computeLikelihoodMatrix(self):
         """
@@ -18,7 +54,9 @@ class WorldEnv:
             Numpy identity matrix representing the likelihood matrix for the grid enviroment.
         """
 
-        return np.eye(len(self.maze_grid.getStateMapIntToTuple()))
+        A = np.eye(len(self.maze_grid.getStateMapIntToTuple()))
+
+        return Categorical(values=A)
 
     def computeTransitionMatrix(self):
         """
@@ -74,4 +112,4 @@ class WorldEnv:
 
                 B[new_state, state, actions[action]] = 1
         
-        return B
+        return Categorical(values=B)
