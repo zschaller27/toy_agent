@@ -17,14 +17,6 @@
  My current idea is to have a helper function that takes a state space (from the Grid object function) and returns a numpy identity matrix with the required shape.
 
 # Transition Matrix
-
  Again this will be very similar to the tutorial because there are the same possible moves, without the STAY option.
 
  The idea is similar, have a helper function that takes in information from the Grid object and returns a 3D numpy transition matrix.
-
-# Todo:
- 1. Build Grid class in Grid.py ✓
- 2. Build function to create likelihood matrix (A) ✓
- 3. Build function to create transition matrix (B) ✓
- 4. Test implementation of steps 2 and 3
- 5. Plan Variational Inference steps
