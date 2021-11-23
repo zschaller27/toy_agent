@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Grid import Grid
 from WorldEnviroment import WorldEnv
-from pymdp.distributions import Categorical
 from pymdp.agent import Agent
 
 def plot_beliefs(belief_dist, title=""):
@@ -24,7 +23,7 @@ B = env.get_transition_dist()
 
 agent = Agent(A=A, B=B, control_fac_idx=[0])
 
-agent.D = Categorical(values=np.array([np.ones(Ns) for Ns in agent.n_states]))
+agent.D = np.array([np.ones(Ns) for Ns in agent.n_states])
 
 plot_beliefs(agent.D[0],"Original Beliefs about Initial Location")
 

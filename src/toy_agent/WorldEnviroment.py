@@ -1,7 +1,6 @@
 import numpy as np
 
-from pymdp.envs import Env, TMazeEnv
-from pymdp.distributions import Categorical
+from pymdp.envs import Env
 
 LOCATION_FACTOR_ID = 0
 TRIAL_FACTOR_ID = 1
@@ -10,6 +9,7 @@ class WorldEnv(Env):
     def __init__(self, grid):
         super(WorldEnv, self).__init__()
         self.maze_grid = grid
+        self.actions = {"UP" : 0, "DOWN" : 1, "LEFT" : 2, "RIGHT" : 3}
 
         self._transition_dist = self.computeTransitionMatrix()
         self._likelihood_dist = self.computeLikelihoodMatrix()
@@ -34,11 +34,25 @@ class WorldEnv(Env):
         return self._transition_dist.copy()
 
     def step(self, action):
-        self.state = np.dot(self._transition_dist[:, :, action], self.state)
+        x_dim, y_dim = self.maze_grid.getDimensions()
+        state_map_int = self.maze_grid.getStateMapIntToTuple()
+        state_map_tuple = self.maze_grid.getStateMapTupleToInt()
+
+        x, y = state_map_int[self.state]
+
+        if action == "UP" and y > 0:
+            self.state = state_map_tuple[(x, y - 1)]
+        elif action == "DOWN" and y < y_dim - 1:
+            self.state = state_map_tuple[(x, y + 1)]
+        elif action == "LEFT" and x > 0:
+            self.state = state_map_tuple[(x - 1, y)]
+        elif action == "RIGHT" and x < x_dim - 1:
+            self.state = state_map_tuple[(x + 1, y)]
+        
+        return self.state
 
     def reset(self):
-        self.state = np.zeros(self.maze_grid.getNumStates())
-        self.state[self.maze_grid.getStartLocation()] = 1
+        self.state = self.maze_grid.getStartLocation()
 
     def computeLikelihoodMatrix(self):
         """
@@ -56,7 +70,7 @@ class WorldEnv(Env):
 
         A = np.eye(len(self.maze_grid.getStateMapIntToTuple()))
 
-        return Categorical(values=A)
+        return A
 
     def computeTransitionMatrix(self):
         """
@@ -74,42 +88,45 @@ class WorldEnv(Env):
         # First construct P dictionary
         P = {}
         x_dim, y_dim = self.maze_grid.getDimensions()
-        actions = {"UP" : 0, "DOWN" : 1, "LEFT" : 2, "RIGHT" : 3}
         state_map_int = self.maze_grid.getStateMapIntToTuple()
         state_map_tuple = self.maze_grid.getStateMapTupleToInt()
 
         # Go through each state and construct a map of state after each possible action
         for state in state_map_int.keys():
-            P[state] = {action : [] for action in range(len(actions))}
+            P[state] = {action : [] for action in range(len(self.actions))}
             x, y = state_map_int[state]
 
             if y <= 0:
-                P[state][actions['UP']] = state
+                P[state][self.actions['UP']] = state
             else:
-                P[state][actions['UP']] =  state_map_tuple[(x, y - 1)]
+                P[state][self.actions['UP']] =  state_map_tuple[(x, y - 1)]
 
             if y >= y_dim - 1:
-                P[state][actions["DOWN"]] = state
+                P[state][self.actions["DOWN"]] = state
             else:
-                P[state][actions["DOWN"]] = state_map_tuple[(x, y + 1)]
+                P[state][self.actions["DOWN"]] = state_map_tuple[(x, y + 1)]
 
             if x <= 0:
-                P[state][actions['LEFT']] = state
+                P[state][self.actions['LEFT']] = state
             else:
-                P[state][actions['LEFT']] = state_map_tuple[(x - 1, y)]
+                P[state][self.actions['LEFT']] = state_map_tuple[(x - 1, y)]
             
             if x >= x_dim - 1:
-                P[state][actions['RIGHT']] = state
+                P[state][self.actions['RIGHT']] = state
             else:
-                P[state][actions['RIGHT']] = state_map_tuple[(x + 1, y)]
+                P[state][self.actions['RIGHT']] = state_map_tuple[(x + 1, y)]
+
+            for action in self.actions.keys():
+                if self.maze_grid.getState(P[state][self.actions[action]]) == "#":
+                    P[state][self.actions[action]] = state
 
         # Construct 3D numpy matrix showing the transitions
-        B = np.zeros([len(state_map_int), len(state_map_int), len(actions)])
+        B = np.zeros([len(state_map_int), len(state_map_int), len(self.actions)])
         for state in state_map_int.keys():
             # For each action find the next state using the P matrix
-            for action in actions.keys():
-                new_state = P[state][actions[action]]
+            for action in self.actions.keys():
+                new_state = P[state][self.actions[action]]
 
-                B[new_state, state, actions[action]] = 1
+                B[new_state, state, self.actions[action]] = 1
         
-        return Categorical(values=B)
+        return B
